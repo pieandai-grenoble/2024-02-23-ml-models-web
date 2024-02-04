@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+onnxruntime = "==1.17.0"
+scikit-learn = "==1.4.0"
+skl2onnx = "==1.16.0"
+tensorflow = "==2.15.0"
+tf2onnx = "==1.16.1"
+
+[dev-packages]
+jupyterlab = "==4.0.12"
+
+[requires]
+python_version = "3.11"
