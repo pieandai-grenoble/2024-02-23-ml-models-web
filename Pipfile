@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pandas = "==2.2.0"
 onnxruntime = "==1.17.0"
 scikit-learn = "==1.4.0"
 skl2onnx = "==1.16.0"
