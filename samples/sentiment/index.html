@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <title>ONNX Runtime JavaScript examples: Quick Start - Web (using script tag)</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    </header>
+    <body>
+        <main>
+            <h1>Sentiment Analysis</h1>
+
+            <form id="analyzeTextForm">
+                <label for="textInput">Text</label>
+                <input id="textInput" type="text" placeholder="Type some english text...">
+
+                <label for="sentimentOutput">Sentiment</label>
+                <input id="sentimentOutput" type="text" disabled>
+
+                <input type="submit" value="Analyze">
+            </form>
+        </main>
+
+        <script type="module">
+            // see also advanced usage of importing ONNX Runtime Web:
+            // https://github.com/microsoft/onnxruntime-inference-examples/tree/main/js/importing_onnxruntime-web
+
+            // import ONNXRuntime Web from CDN
+            import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js";
+            // set wasm path override
+            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/";
+
+            // create a new session and load the specific model.
+            //
+            // 1 input:
+            //     - 'X' (string, 1x1)
+            // 2 output:
+            //     - 'probabilities' (float32, 1x1)
+            //     - 'label' (string, 1x1)
+            const session = await ort.InferenceSession.create('./model.onnx');
+
+            // use an async context to call onnxruntime functions.
+            async function analyzeText(text) {
+                try {
+                    // prepare inputs. a tensor need its corresponding TypedArray as data
+                    const tensorX = new ort.Tensor('string', [text], [1])
+                    const inputs = { X: tensorX }
+
+                    // feed inputs and run
+                    const outputs = await session.run(inputs)
+
+                    // read from outputs
+                    const outputProbabilities = outputs.probabilities.data
+                    const outputLabel = outputs.label.data
+                    console.info(`'output_probabilities': ${outputProbabilities}`)
+                    console.info(`'output_label': ${outputLabel}`)
+
+                    return (outputLabel == 'neg' ? 'Negative' : 'Positive')
+                } catch (e) {
+                    console.error(`failed to inference ONNX model: ${e}.`)
+                }
+            }
+
+            function main() {
+                const form = document.getElementById('analyzeTextForm')
+                form.addEventListener('submit', async event => {
+                    event.preventDefault()
+                    const textInput = document.getElementById('textInput').value
+                    const sentimentOutput = await analyzeText(textInput)
+                    document.getElementById('sentimentOutput').value = sentimentOutput
+                })
+            }
+
+            main()
+        </script>
+    </body>
+</html>

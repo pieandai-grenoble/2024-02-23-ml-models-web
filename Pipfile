@@ -4,14 +4,16 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pandas = "==2.2.0"
+nltk = "==3.8.1"
 onnxruntime = "==1.17.0"
+pandas = "==2.2.0"
 scikit-learn = "==1.4.0"
 skl2onnx = "==1.16.0"
 tensorflow = "==2.15.0"
 tf2onnx = "==1.16.1"
 
 [dev-packages]
+black = {extras = ["jupyter"], version = "==24.1.1"}
 jupyterlab = "==4.0.12"
 
 [requires]
