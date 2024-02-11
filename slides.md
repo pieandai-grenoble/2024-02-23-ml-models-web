@@ -142,6 +142,7 @@ Famous usage in Data Science ecosystem:
 
 - [ONNX][onnx]
 - [ONNX Runtime][onnx-runtime]
+- [ONNX Runtime Web Samples][onnx-runtime-web-samples]
 - [Netron][netron]
 - [sklearn-onnx][sklearn-onnx]
 - [tensorflow-onnx][tensorflow-onnx]
@@ -151,6 +152,7 @@ Famous usage in Data Science ecosystem:
 [onnx]: https://onnx.ai
 [onnx-operators]: https://onnx.ai/onnx/operators/
 [onnx-runtime]: https://onnxruntime.ai
+[onnx-runtime-web-samples]: https://github.com/microsoft/onnxruntime-inference-examples/tree/main/js/importing_onnxruntime-web
 [netron]: https://netron.app
 [sklearn-onnx]: https://onnx.ai/sklearn-onnx/
 [tensorflow-onnx]: https://github.com/onnx/tensorflow-onnx
