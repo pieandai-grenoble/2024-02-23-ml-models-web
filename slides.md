@@ -8,7 +8,7 @@ description: Learn how to run inference of machine learning and deep learning mo
 url: https://github.com/pieandai-grenoble/2024-02-23-ml-models-web
 ---
 
-![bg](banner.png)
+![bg](static/banner.png)
 
 ---
 
@@ -22,10 +22,18 @@ url: https://github.com/pieandai-grenoble/2024-02-23-ml-models-web
 
 ---
 
+## What's all about?
+
+<!-- Quick demo of image classification with a cat -->
+
+---
+
 ## 🧠 ML workflow recap
 
 1. Model training
 2. Model inference
+
+<!-- TODO: add illustration of supervised learning -->
 
 ---
 
@@ -36,6 +44,8 @@ url: https://github.com/pieandai-grenoble/2024-02-23-ml-models-web
 - Compute intensive
 - Python, R, Julia, MATLAB, etc.
 
+<!-- TODO: add logos -->
+
 ---
 
 ## 🧠 ML workflow recap - Model inference
@@ -44,6 +54,10 @@ url: https://github.com/pieandai-grenoble/2024-02-23-ml-models-web
 - Predictions from trained model
 - Less compute intensive
 - Python, C++, Go, Rust, etc.
+
+<!-- Mention while it may be less compute intensive than training, it can become power hungry when used at scale with lots of users (cf. OpenAI) -->
+
+<!-- TODO: add logos -->
 
 ---
 
@@ -57,6 +71,10 @@ url: https://github.com/pieandai-grenoble/2024-02-23-ml-models-web
 - Interoperability
 - Inference in any language
 - Inference on multiple backends
+
+<!-- Note: while the name implies NN, it can be used for any type of model not only NNs -->
+
+<!-- TODO: add illustration of Netron graph -->
 
 <!-- TODO: add illustration from model training to generic inference -->
 ![bg right]()
@@ -105,6 +123,10 @@ Available runtimes:
 - Fast, safe and open
 - Privacy
 
+<!-- Note: supported by all major browsers since 2017 -->
+
+<!-- Privacy: no personal information leaking server-side (cf. OpenAI) -->
+
 ---
 
 ## 🌍 WebAssembly
@@ -118,7 +140,36 @@ Famous usage in Data Science ecosystem:
 
 ---
 
+## ⚙️ How does it work?
+
+
+
+---
+
 ## 🧑‍💻 Examples
+
+🏠 Housing Value Estimation
+
+- [Web](samples/housing/index.html)
+- [Notebook](samples/housing/training.html)
+
+---
+
+## 🧑‍💻 Examples
+
+🍿 Sentiment Analysis
+
+- [Web](samples/sentiment/index.html)
+- [Notebook](samples/sentiment/training.html)
+
+---
+
+## 🧑‍💻 Examples
+
+[🌉 Image Classification](samples/imaging/index.html)
+
+- [Web](samples/imaging/index.html)
+- [Notebook](samples/imaging/training.html)
 
 ---
 
@@ -129,10 +180,11 @@ Famous usage in Data Science ecosystem:
 - Inference at the edge
 - No server required for inference
 - Easier app integration
-- Leverage WebGPU API
+- Leverage WebGPU API (experimental)
 
 ☢️ Cons
 
+- Lack of documentation
 - Memory limitations
 - Model size
 
