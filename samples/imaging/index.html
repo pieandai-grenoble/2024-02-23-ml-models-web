@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <title>ONNX Runtime Web sample</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    </header>
+    <body>
+        <main>
+            <h1>Image Classification</h1>
+
+            <img id="imagePreview" src="" style="max-width: 224px; height: auto; border: 1 solid lightgray;">
+
+            <form id="classifyImageForm">
+                <label for="imageInput">Image</label>
+                <input id="imageInput" type="file" accept=".png,.jpg,.jpeg">
+
+                <label for="classOutput">Class</label>
+                <input id="classOutput" type="text" disabled>
+
+                <input type="submit" value="Classify">
+            </form>
+        </main>
+
+        <script type="module">
+            // import Jimp from CDN
+            import "https://cdn.jsdelivr.net/npm/jimp@0.22.10/browser/lib/jimp.min.js"
+
+            // import ONNXRuntime Web from CDN
+            import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js"
+
+            // set wasm path override
+            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/"
+
+            // create a new session and load the specific model.
+            //
+            // 1 input:
+            //     - 'input_1' (float32, -1x224x224x3)
+            // 2 output:
+            //     - 'predictions' (float32, -1x1000)
+            const session = await ort.InferenceSession.create('./model.onnx')
+
+            function imageDataToTensor(image, dims) {
+                // 1. Get buffer data from image and create R, G, and B arrays.
+                var imageBufferData = image.bitmap.data
+                const [redArray, greenArray, blueArray] = new Array(new Array(), new Array(), new Array())
+
+                // 2. Loop through the image buffer and extract the R, G, and B channels
+                for (let i = 0; i < imageBufferData.length; i += 4) {
+                    redArray.push(imageBufferData[i])
+                    greenArray.push(imageBufferData[i + 1])
+                    blueArray.push(imageBufferData[i + 2])
+                    // skip data[i + 3] to filter out the alpha channel
+                }
+
+                // 3. Concatenate RGB to transpose [224, 224, 3] -> [3, 224, 224] to a number array
+                const transposedData = redArray.concat(greenArray).concat(blueArray)
+
+                // 4. convert to float32
+                let i, l = transposedData.length // length, we need this for the loop
+                // create the Float32Array size 3 * 224 * 224 for these dimensions output
+                const float32Data = new Float32Array(dims[1] * dims[2] * dims[3])
+                for (i = 0; i < l; i++) {
+                    float32Data[i] = transposedData[i]
+                }
+                // 5. create the tensor object from onnxruntime-web.
+                const inputTensor = new ort.Tensor("float32", float32Data, dims)
+                return inputTensor
+            }
+
+            // use an async context to call onnxruntime functions
+            async function classifyImage(image) {
+                // prepare inputs
+                const tensorImage = imageDataToTensor(image, [1, 224, 224, 3])
+                const inputs = { input_1: tensorImage }
+
+                try {
+                    // feed inputs and run
+                    const outputs = await session.run(inputs)
+
+                    // read from outputs
+                    const outputPredictions = outputs.predictions.data
+
+                    // fetch imagenet class index file
+                    const response = await fetch("imagenet_class_index.json")
+                    const imagenet_class_index = await response.json()
+
+                    // compute top predicted class index and name
+                    const classIndex = outputPredictions.indexOf(Math.max(...outputPredictions))
+                    const className = imagenet_class_index[String(classIndex)][1]
+                    console.info(`class index: ${classIndex}`)
+                    console.info(`class name: ${className}`)
+
+                    return className
+                } catch (e) {
+                    console.error(`failed to inference ONNX model: ${e}.`)
+                }
+            }
+
+            function main() {
+                // trigger inference when submiting the form
+                const form = document.getElementById('classifyImageForm')
+                form.addEventListener('submit', async event => {
+                    event.preventDefault()
+                    const imageInput = document.getElementById('imageInput').files[0]
+                    const imageBuffer = await imageInput.arrayBuffer()
+                    const image = await Jimp.read(imageBuffer).then((buf) => {
+                        return buf.resize(224, 224)
+                    })
+
+                    const classOutput = await classifyImage(image)
+                    document.getElementById('classOutput').value = classOutput
+                })
+
+                // preview the selected image
+                document.getElementById('imageInput').addEventListener('change', async event => {
+                    document.getElementById('imagePreview').setAttribute('src', window.URL.createObjectURL(event.target.files[0]))
+                })
+            }
+
+            main()
+        </script>
+    </body>
+</html>
