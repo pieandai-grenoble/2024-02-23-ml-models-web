@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <header>
-        <title>ONNX Runtime JavaScript examples: Quick Start - Web (using script tag)</title>
+        <title>ONNX Runtime Web sample</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     </header>
@@ -21,13 +21,11 @@
         </main>
 
         <script type="module">
-            // see also advanced usage of importing ONNX Runtime Web:
-            // https://github.com/microsoft/onnxruntime-inference-examples/tree/main/js/importing_onnxruntime-web
-
             // import ONNXRuntime Web from CDN
-            import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js";
+            import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js"
+
             // set wasm path override
-            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/";
+            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/"
 
             // create a new session and load the specific model.
             //
@@ -36,12 +34,12 @@
             // 2 output:
             //     - 'probabilities' (float32, 1x1)
             //     - 'label' (string, 1x1)
-            const session = await ort.InferenceSession.create('./model.onnx');
+            const session = await ort.InferenceSession.create('./model.onnx')
 
-            // use an async context to call onnxruntime functions.
+            // use an async context to call onnxruntime functions
             async function analyzeText(text) {
                 try {
-                    // prepare inputs. a tensor need its corresponding TypedArray as data
+                    // prepare inputs
                     const tensorX = new ort.Tensor('string', [text], [1])
                     const inputs = { X: tensorX }
 
@@ -61,6 +59,7 @@
             }
 
             function main() {
+                // trigger inference when submiting the form
                 const form = document.getElementById('analyzeTextForm')
                 form.addEventListener('submit', async event => {
                     event.preventDefault()
