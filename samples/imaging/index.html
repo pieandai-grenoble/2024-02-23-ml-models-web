@@ -40,30 +40,23 @@
             //     - 'predictions' (float32, -1x1000)
             const session = await ort.InferenceSession.create('./model.onnx')
 
+            // fetch imagenet class index file
+            const response = await fetch("imagenet_class_index.json")
+            const imagenetClassIndex = await response.json()
+
             function imageDataToTensor(image, dims) {
-                // 1. Get buffer data from image and create R, G, and B arrays.
+                // get buffer data from Jimp image
                 var imageBufferData = image.bitmap.data
-                const [redArray, greenArray, blueArray] = new Array(new Array(), new Array(), new Array())
 
-                // 2. Loop through the image buffer and extract the R, G, and B channels
-                for (let i = 0; i < imageBufferData.length; i += 4) {
-                    redArray.push(imageBufferData[i])
-                    greenArray.push(imageBufferData[i + 1])
-                    blueArray.push(imageBufferData[i + 2])
-                    // skip data[i + 3] to filter out the alpha channel
-                }
-
-                // 3. Concatenate RGB to transpose [224, 224, 3] -> [3, 224, 224] to a number array
-                const transposedData = redArray.concat(greenArray).concat(blueArray)
-
-                // 4. convert to float32
-                let i, l = transposedData.length // length, we need this for the loop
-                // create the Float32Array size 3 * 224 * 224 for these dimensions output
+                // convert image buffer from RGBA to RGB
                 const float32Data = new Float32Array(dims[1] * dims[2] * dims[3])
-                for (i = 0; i < l; i++) {
-                    float32Data[i] = transposedData[i]
+                for (let i = 0, j = 0; i < imageBufferData.length; i += 4, j += 3) {
+                    float32Data[j] = imageBufferData[i]
+                    float32Data[j + 1] = imageBufferData[i + 1]
+                    float32Data[j + 2] = imageBufferData[i + 2]
                 }
-                // 5. create the tensor object from onnxruntime-web.
+
+                // create tensor from RGB buffer with proper dimensions
                 const inputTensor = new ort.Tensor("float32", float32Data, dims)
                 return inputTensor
             }
@@ -81,13 +74,9 @@
                     // read from outputs
                     const outputPredictions = outputs.predictions.data
 
-                    // fetch imagenet class index file
-                    const response = await fetch("imagenet_class_index.json")
-                    const imagenet_class_index = await response.json()
-
                     // compute top predicted class index and name
                     const classIndex = outputPredictions.indexOf(Math.max(...outputPredictions))
-                    const className = imagenet_class_index[String(classIndex)][1]
+                    const className = imagenetClassIndex[String(classIndex)][1]
                     console.info(`class index: ${classIndex}`)
                     console.info(`class name: ${className}`)
 
@@ -105,7 +94,7 @@
                     const imageInput = document.getElementById('imageInput').files[0]
                     const imageBuffer = await imageInput.arrayBuffer()
                     const image = await Jimp.read(imageBuffer).then((buf) => {
-                        return buf.resize(224, 224)
+                        return buf.resize(224, 224).rgba(false)
                     })
 
                     const classOutput = await classifyImage(image)
