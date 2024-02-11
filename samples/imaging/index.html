@@ -48,12 +48,12 @@
                 // get buffer data from Jimp image
                 var imageBufferData = image.bitmap.data
 
-                // convert image buffer from RGBA to RGB
+                // convert image buffer from RGBA to RGB and normalize pixel values between -1 and 1
                 const float32Data = new Float32Array(dims[1] * dims[2] * dims[3])
                 for (let i = 0, j = 0; i < imageBufferData.length; i += 4, j += 3) {
-                    float32Data[j] = imageBufferData[i]
-                    float32Data[j + 1] = imageBufferData[i + 1]
-                    float32Data[j + 2] = imageBufferData[i + 2]
+                    float32Data[j] = (imageBufferData[i] / 127.5) - 1.0
+                    float32Data[j + 1] = (imageBufferData[i + 1] / 127.5) - 1.0
+                    float32Data[j + 2] = (imageBufferData[i + 2] / 127.5) - 1.0
                 }
 
                 // create tensor from RGB buffer with proper dimensions
