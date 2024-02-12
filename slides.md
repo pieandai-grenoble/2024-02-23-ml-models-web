@@ -267,7 +267,7 @@ GitHub Repository
 
 ## 🧑‍💻 Examples
 
-[🌉 Image Classification](samples/imaging/index.html)
+🌉 Image Classification
 
 - [Notebook](samples/imaging/training.html)
 - [Web](samples/imaging/index.html)
