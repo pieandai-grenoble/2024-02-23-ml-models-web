@@ -291,14 +291,6 @@ GitHub Repository
 
 ---
 
-# 🙋 Q&A
-
-## Thank you for your attention!
-
-## Any questions?
-
----
-
 # 📚 References
 
 - [ONNX][onnx]
@@ -309,6 +301,32 @@ GitHub Repository
 - [tensorflow-onnx][tensorflow-onnx]
 - [torch.onnx][torch-onnx]
 - [WebAssembly][webassembly]
+
+---
+
+# 🙋 Q&A
+
+## Thank you for your attention!
+
+## Any questions?
+
+---
+
+## Thank you for attending the first Pie & AI event in Grenoble, France!
+
+> **🔥 Tip**
+>
+> You will receive a promo code for a 50% off first month subscription on Coursera after filling the form sent by DeepLearning.ai
+
+![bg right w:80%](static/pieandai_logo.png)
+
+<!--
+We'll send out a survey to the list of registrants after the event, and we’ll offer course promo code to the people who complete the survey.
+
+Please remind your event attendees during the event to keep an eye out for our email if they’d like to receive the code.
+
+The code is for 50% off first month subscription for any of our courses on Coursera.
+ -->
 
 [onnx]: https://onnx.ai
 [onnx-operators]: https://onnx.ai/onnx/operators/
