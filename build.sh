@@ -4,7 +4,7 @@ set -ex
 
 mkdir -p dist
 cp -R static dist/static
-npx --yes @marp-team/marp-cli@latest slides.md -o dist/index.html
+npx --yes @marp-team/marp-cli@latest slides.md --output dist/index.html --html
 
 mkdir -p dist/samples/housing
 cp samples/housing/index.html dist/samples/housing/index.html
