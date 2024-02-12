@@ -14,6 +14,10 @@ This event is hosted by Romain Clement & Pierre-Loïc Bayart on February 13th, 2
 
 ## Agenda
 
+19H00 - 19H05: Introduction
+19H05 - 20H00: Talk + Q&A
+20H00 - 21H00: Networking
+
 Training machine learning models usually requires a great amount of computing power and is performed on powerful computing resources. However, running inference on trained models does not require such a powerful setup.
 
 Most of the trained models are deployed on a server and inference is ran on some backend service such as a REST API. What if these models could be executed directly inside a web browser? This change of paradigm could have a great impact on required computing resources but also on data privacy.

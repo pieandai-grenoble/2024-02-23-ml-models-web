@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <title>ONNX Runtime Web sample</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    </header>
+    <body>
+        <main>
+            <h1>Housing Value Estimation</h1>
+
+            <form id="estimateHousingForm">
+                <label for="areaInput">Living area (m2)</label>
+                <input id="areaInput" type="number" min="10" max="200" value="50">
+
+                <label for="roomsInput">Number of rooms</label>
+                <input id="roomsInput" type="number" min="1" max="10" step="1" value="3">
+
+                <label for="latitudeInput">Latitude</label>
+                <input id="latitudeInput" type="number" value="45.1893525">
+
+                <label for="longitudeInput">Longitude</label>
+                <input id="longitudeInput" type="number" value="5.7216074">
+
+                <label for="valueOutput">Value</label>
+                <input id="valueOutput" type="text" disabled>
+
+                <input type="submit" value="Estimate">
+            </form>
+        </main>
+
+        <script type="module">
+            // import ONNXRuntime Web from CDN
+            import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js"
+
+            // set wasm path override
+            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/"
+
+            // create a new session and load the specific model.
+            //
+            // 4 inputs:
+            //     - 'area' (float32, 1x1)
+            //     - 'rooms' (float32, 1x1)
+            //     - 'latitude' (float32, 1x1)
+            //     - 'longitude' (float32, 1x1)
+            // 1 output:
+            //     - 'variable'(float32, 3x3)
+            const session = await ort.InferenceSession.create('./model.onnx')
+
+            // use an async context to call onnxruntime functions
+            async function estimateHousing(areaInput, roomsInput, latitudeInput, longitudeInput) {
+                try {
+                    // prepare inputs
+                    const area = new ort.Tensor('float32', Float32Array.from([areaInput]), [1, 1])
+                    const rooms = new ort.Tensor('float32', Float32Array.from([roomsInput]), [1, 1])
+                    const latitude = new ort.Tensor('float32', Float32Array.from([latitudeInput]), [1, 1])
+                    const longitude = new ort.Tensor('float32', Float32Array.from([longitudeInput]), [1, 1])
+                    const inputs = { area, rooms, latitude, longitude }
+
+                    // feed inputs and run
+                    const results = await session.run(inputs)
+
+                    // read from results
+                    const outputVariable = results.variable.data
+                    console.info(`'variable': ${outputVariable}`)
+
+                    return outputVariable
+                } catch (e) {
+                    console.error(`failed to inference ONNX model: ${e}.`)
+                }
+            }
+
+            function main() {
+                // trigger inference when submiting the form
+                const form = document.getElementById('estimateHousingForm')
+                form.addEventListener('submit', async event => {
+                    event.preventDefault()
+                    const areaInput = document.getElementById('areaInput').value
+                    const roomsInput = document.getElementById('roomsInput').value
+                    const latitudeInput = document.getElementById('latitudeInput').value
+                    const longitudeInput = document.getElementById('longitudeInput').value
+                    const valueOutput = await estimateHousing(areaInput, roomsInput, latitudeInput, longitudeInput)
+                    document.getElementById('valueOutput').value = valueOutput
+                })
+            }
+
+            main()
+        </script>
+    </body>
+</html>
