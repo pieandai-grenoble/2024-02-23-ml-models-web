@@ -1,4 +1,4 @@
-![Banner](banner.png)
+![Banner](static/banner.png)
 
 # Pie & AI: Grenoble - Running machine learning models in the browser
 
