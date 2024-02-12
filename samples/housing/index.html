@@ -10,10 +10,10 @@
             <h1>Housing Value Estimation</h1>
 
             <form id="estimateHousingForm">
-                <label for="surfaceInput">Surface (m2)</label>
-                <input id="surfaceInput" type="number" min="10" max="200" value="50">
+                <label for="areaInput">Living area (m2)</label>
+                <input id="areaInput" type="number" min="10" max="200" value="50">
 
-                <label for="roomsInput">Rooms</label>
+                <label for="roomsInput">Number of rooms</label>
                 <input id="roomsInput" type="number" min="1" max="10" step="1" value="3">
 
                 <label for="latitudeInput">Latitude</label>
@@ -39,8 +39,8 @@
             // create a new session and load the specific model.
             //
             // 4 inputs:
-            //     - 'surface_reelle_bati' (float32, 1x1)
-            //     - 'nombre_pieces_principales' (float32, 1x1)
+            //     - 'area' (float32, 1x1)
+            //     - 'rooms' (float32, 1x1)
             //     - 'latitude' (float32, 1x1)
             //     - 'longitude' (float32, 1x1)
             // 1 output:
@@ -48,14 +48,14 @@
             const session = await ort.InferenceSession.create('./model.onnx')
 
             // use an async context to call onnxruntime functions
-            async function estimateHousing(surfaceInput, roomsInput, latitudeInput, longitudeInput) {
+            async function estimateHousing(areaInput, roomsInput, latitudeInput, longitudeInput) {
                 try {
                     // prepare inputs
-                    const surface_reelle_bati = new ort.Tensor('float32', Float32Array.from([surfaceInput]), [1, 1])
-                    const nombre_pieces_principales = new ort.Tensor('float32', Float32Array.from([roomsInput]), [1, 1])
+                    const area = new ort.Tensor('float32', Float32Array.from([areaInput]), [1, 1])
+                    const rooms = new ort.Tensor('float32', Float32Array.from([roomsInput]), [1, 1])
                     const latitude = new ort.Tensor('float32', Float32Array.from([latitudeInput]), [1, 1])
                     const longitude = new ort.Tensor('float32', Float32Array.from([longitudeInput]), [1, 1])
-                    const inputs = { surface_reelle_bati, nombre_pieces_principales, latitude, longitude }
+                    const inputs = { area, rooms, latitude, longitude }
 
                     // feed inputs and run
                     const results = await session.run(inputs)
@@ -75,11 +75,11 @@
                 const form = document.getElementById('estimateHousingForm')
                 form.addEventListener('submit', async event => {
                     event.preventDefault()
-                    const surfaceInput = document.getElementById('surfaceInput').value
+                    const areaInput = document.getElementById('areaInput').value
                     const roomsInput = document.getElementById('roomsInput').value
                     const latitudeInput = document.getElementById('latitudeInput').value
                     const longitudeInput = document.getElementById('longitudeInput').value
-                    const valueOutput = await estimateHousing(surfaceInput, roomsInput, latitudeInput, longitudeInput)
+                    const valueOutput = await estimateHousing(areaInput, roomsInput, latitudeInput, longitudeInput)
                     document.getElementById('valueOutput').value = valueOutput
                 })
             }
