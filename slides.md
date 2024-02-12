@@ -5,59 +5,103 @@ paginate: true
 author: Romain Clement & Pierre-Loïc Bayart
 title: Running machine learning models in the browser
 description: Learn how to run inference of machine learning and deep learning models locally in the browser
-url: https://github.com/pieandai-grenoble/2024-02-23-ml-models-web
+url: https://pieandai-grenoble.github.io/2024-02-23-ml-models-web/
+footer: "Pie & AI: Grenoble - Running machine learning models in the browser"
 ---
+
+<!-- _paginate: skip -->
+<!-- _footer: "" -->
+
+<style>
+section::after {
+  content: attr(data-marpit-pagination) '/' attr(data-marpit-pagination-total);
+}
+</style>
 
 ![bg](static/banner.png)
 
 ---
 
-## Summary
+# Agenda
 
-1. 🧠 ML workflow recap
-2. 🤝 ONNX format
-3. 🌍 WebAssembly
-4. 🧑‍💻 Examples
-5. 🏁 Final notes
+| Time          | Event                       |
+| ------------- | --------------------------- |
+| 19:00 - 19:05 | Introduction from Andrew Ng |
+| 19:05 - 20:00 | Talk + Q&A                  |
+| 20:00 - 21:00 | Networking                  |
 
 ---
 
-## What's all about?
+# Introduction from Andrew Ng
+
+<iframe
+    src="https://drive.google.com/file/d/1zM2cTa_NllO1_vih1rEGIMvH1J_56piR/preview"
+    width="800"
+    height="450"
+    allow="autoplay"
+></iframe>
+
+---
+
+# Running machine learning models in the browser
+
+## Summary
+
+1. 🧠 ML workflow
+2. 🤝 ONNX format
+3. 🌍 WebAssembly
+4. ⚙️ Deploy in the browser
+5. 🧑‍💻 Examples
+6. 🏁 Final notes
+
+---
+
+## 😸 It's a cat!
+
+What are we trying to achieve?
+
+[Quick demo](samples/imaging/index.html)
 
 <!-- Quick demo of image classification with a cat -->
 
 ---
 
-## 🧠 ML workflow recap
+## 🧠 ML workflow
+
+Two distinct phases:
 
 1. Model training
 2. Model inference
 
-<!-- TODO: add illustration of supervised learning -->
+![bg right:60% w:100%](static/ml_training_inference.png)
 
 ---
 
-## 🧠 ML workflow recap - Model training
+## 🧠 ML workflow
+
+> Model training
 
 - Offline
 - Data collection
-- Compute intensive
+- Compute intensive (CPU, GPU)
 - Python, R, Julia, MATLAB, etc.
 
-<!-- TODO: add logos -->
+![bg right:40% w:100%](static/ml_training_logos.png)
 
 ---
 
-## 🧠 ML workflow recap - Model inference
+## 🧠 ML workflow
+
+> Model inference
 
 - Online runtime
 - Predictions from trained model
 - Less compute intensive
 - Python, C++, Go, Rust, etc.
 
-<!-- Mention while it may be less compute intensive than training, it can become power hungry when used at scale with lots of users (cf. OpenAI) -->
+<!-- Note: while it may be less compute intensive than training, it can become power hungry when used at scale with lots of users (cf. OpenAI with ChatGPT) -->
 
-<!-- TODO: add logos -->
+![bg right:40% w:100%](static/ml_inference_logos.png)
 
 ---
 
@@ -72,12 +116,15 @@ url: https://github.com/pieandai-grenoble/2024-02-23-ml-models-web
 - Inference in any language
 - Inference on multiple backends
 
+![bg right w:100%](static/onnx_interop.png)
+
 <!-- Note: while the name implies NN, it can be used for any type of model not only NNs -->
 
-<!-- TODO: add illustration of Netron graph -->
+<!-- Note: runtime reference implementation in C++, bindings for most languages -->
 
-<!-- TODO: add illustration from model training to generic inference -->
-![bg right]()
+<!-- Note: backends available for CPU, CUDA, OpenVINO, proprietary HW accelerators, etc. -->
+
+<!-- Source: https://azure.microsoft.com/fr-fr/blog/onnx-runtime-for-inferencing-machine-learning-models-now-in-preview/ -->
 
 ---
 
@@ -97,8 +144,13 @@ Export models from favourite framework:
 
 Using [Netron][netron] to visualize an ONNX model
 
-<!-- TODO: add Netron screenshot of simple model -->
-![bg right]()
+![bg right w:90%](static/netron_logo.png)
+
+---
+
+<!-- _footer: "" -->
+
+![bg w:100%](static/netron_model.png)
 
 ---
 
@@ -123,6 +175,8 @@ Available runtimes:
 - Fast, safe and open
 - Privacy
 
+![bg right w:30%](static/wasm_logo.png)
+
 <!-- Note: supported by all major browsers since 2017 -->
 
 <!-- Privacy: no personal information leaking server-side (cf. OpenAI) -->
@@ -140,9 +194,56 @@ Famous usage in Data Science ecosystem:
 
 ---
 
-## ⚙️ How does it work?
+## ⚙️ Deploy in the browser
 
+> Training (with Scikit-Learn)
 
+```python
+# Train model on training dataset
+model.fit(X_train, y_train)
+
+# Convert to ONNX
+onnx_model = skl2onnx.to_onnx(model, X_train[:1].astype(np.float32))
+
+# Save ONNX model to ONNX format
+onnx_model_path.write_bytes(onnx_model.SerializeToString())
+```
+
+---
+
+## ⚙️ Deploy in the browser
+
+> Inference (with ONNX Runtime Web)
+
+```html
+<script type="module">
+// import ONNXRuntime Web
+import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js"
+
+// Create an inference session and load the model
+const session = await ort.InferenceSession.create('./model.onnx')
+
+// prepare inputs
+const area = new ort.Tensor('float32', Float32Array.from([areaInput]), [1, 1])
+const rooms = new ort.Tensor('float32', Float32Array.from([roomsInput]), [1, 1])
+const latitude = new ort.Tensor('float32', Float32Array.from([latitudeInput]), [1, 1])
+const longitude = new ort.Tensor('float32', Float32Array.from([longitudeInput]), [1, 1])
+const inputs = { area, rooms, latitude, longitude }
+
+// feed inputs and run
+const results = await session.run(inputs)
+
+// read from results
+const outputVariable = results.variable.data
+</script>
+```
+---
+
+## 🧑‍💻 Examples
+
+GitHub Repository
+
+[`pieandai-grenoble/2024-02-23-ml-models-web`](https://github.com/pieandai-grenoble/2024-02-23-ml-models-web)
 
 ---
 
@@ -150,8 +251,8 @@ Famous usage in Data Science ecosystem:
 
 🏠 Housing Value Estimation
 
-- [Web](samples/housing/index.html)
 - [Notebook](samples/housing/training.html)
+- [Web](samples/housing/index.html)
 
 ---
 
@@ -159,8 +260,8 @@ Famous usage in Data Science ecosystem:
 
 🍿 Sentiment Analysis
 
-- [Web](samples/sentiment/index.html)
 - [Notebook](samples/sentiment/training.html)
+- [Web](samples/sentiment/index.html)
 
 ---
 
@@ -168,8 +269,8 @@ Famous usage in Data Science ecosystem:
 
 [🌉 Image Classification](samples/imaging/index.html)
 
-- [Web](samples/imaging/index.html)
 - [Notebook](samples/imaging/training.html)
+- [Web](samples/imaging/index.html)
 
 ---
 
@@ -180,7 +281,7 @@ Famous usage in Data Science ecosystem:
 - Inference at the edge
 - No server required for inference
 - Easier app integration
-- Leverage WebGPU API (experimental)
+- Support for WebGPU API (experimental)
 
 ☢️ Cons
 
@@ -190,11 +291,19 @@ Famous usage in Data Science ecosystem:
 
 ---
 
-## 📚 References
+# 🙋 Q&A
+
+## Thank you for your attention!
+
+## Any questions?
+
+---
+
+# 📚 References
 
 - [ONNX][onnx]
 - [ONNX Runtime][onnx-runtime]
-- [ONNX Runtime Web Samples][onnx-runtime-web-samples]
+- [ONNX Runtime Inference Examples][onnx-runtime-web-samples]
 - [Netron][netron]
 - [sklearn-onnx][sklearn-onnx]
 - [tensorflow-onnx][tensorflow-onnx]
@@ -204,7 +313,7 @@ Famous usage in Data Science ecosystem:
 [onnx]: https://onnx.ai
 [onnx-operators]: https://onnx.ai/onnx/operators/
 [onnx-runtime]: https://onnxruntime.ai
-[onnx-runtime-web-samples]: https://github.com/microsoft/onnxruntime-inference-examples/tree/main/js/importing_onnxruntime-web
+[onnx-runtime-web-samples]: https://github.com/microsoft/onnxruntime-inference-examples
 [netron]: https://netron.app
 [sklearn-onnx]: https://onnx.ai/sklearn-onnx/
 [tensorflow-onnx]: https://github.com/onnx/tensorflow-onnx
