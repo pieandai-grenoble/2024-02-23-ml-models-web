@@ -112,9 +112,9 @@
 
                     // retrieve image buffer from video stream using the canvas
                     // image is mirrored for natural look
-                    context.setTransform(-1, 0, 0, 1, canvas.width, 0)
                     const scaledHeight = canvas.width * (video.height / video.width)
                     context.reset()
+                    context.setTransform(-1, 0, 0, 1, canvas.width, 0)
                     context.drawImage(video, 0, (canvas.height - scaledHeight) / 2, canvas.width, scaledHeight)
                     const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
                     const { data, width, height } = imageData
