@@ -18,6 +18,7 @@ pipenv run jupyter nbconvert --to html --output-dir dist/samples/sentiment --exe
 
 mkdir -p dist/samples/imaging
 cp samples/imaging/index.html dist/samples/imaging/index.html
+cp samples/imaging/live.html dist/samples/imaging/live.html
 cp samples/imaging/model.onnx dist/samples/imaging/model.onnx
 cp samples/imaging/imagenet_class_index.json dist/samples/imaging/imagenet_class_index.json
 pipenv run jupyter nbconvert --to html --output-dir dist/samples/imaging --execute samples/imaging/training.ipynb

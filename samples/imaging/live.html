@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <title>ONNX Runtime Web sample</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    </header>
+    <body>
+        <main>
+            <h1>Image Classification (live)</h1>
+
+            <video disablePictureInPicture id="videoPreview" style="width: 224px; height: 224px; transform: scaleX(-1);"></video>
+            <canvas id="videoCanvas" style="width: 224px; height: 224px;"> </canvas>
+
+            <form id="classifyImageForm">
+                <label for="classOutput">Class</label>
+                <input id="classOutput" type="text" disabled>
+
+                <input type="submit" value="Classify">
+            </form>
+        </main>
+
+        <script type="module">
+            // import ONNXRuntime Web from CDN
+            import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js"
+
+            // set wasm path override
+            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/"
+
+            // create a new session and load the specific model.
+            //
+            // 1 input:
+            //     - 'input_1' (float32, -1x224x224x3)
+            // 2 output:
+            //     - 'predictions' (float32, -1x1000)
+            const session = await ort.InferenceSession.create('./model.onnx')
+
+            // fetch imagenet class index file
+            const response = await fetch("imagenet_class_index.json")
+            const imagenetClassIndex = await response.json()
+
+            function imageDataToTensor(image, dims) {
+                // convert image buffer from RGBA to RGB and normalize pixel values between -1 and 1
+                const float32Data = new Float32Array(dims[1] * dims[2] * dims[3])
+                for (let i = 0, j = 0; i < image.length; i += 4, j += 3) {
+                    float32Data[j] = (image[i] / 127.5) - 1.0
+                    float32Data[j + 1] = (image[i + 1] / 127.5) - 1.0
+                    float32Data[j + 2] = (image[i + 2] / 127.5) - 1.0
+                }
+
+                // create tensor from RGB buffer with proper dimensions
+                const inputTensor = new ort.Tensor("float32", float32Data, dims)
+                return inputTensor
+            }
+
+            // use an async context to call onnxruntime functions
+            async function classifyImage(image) {
+                // prepare inputs
+                const tensorImage = imageDataToTensor(image, [1, 224, 224, 3])
+                const inputs = { input_1: tensorImage }
+
+                try {
+                    // feed inputs and run
+                    const outputs = await session.run(inputs)
+
+                    // read from outputs
+                    const outputPredictions = outputs.predictions.data
+
+                    // compute top predicted class index and name
+                    const classIndex = outputPredictions.indexOf(Math.max(...outputPredictions))
+                    const className = imagenetClassIndex[String(classIndex)][1]
+                    console.info(`class index: ${classIndex}`)
+                    console.info(`class name: ${className}`)
+
+                    return className
+                } catch (e) {
+                    console.error(`failed to inference ONNX model: ${e}.`)
+                }
+            }
+
+            async function main() {
+                // start the camera live stream
+                const video = document.getElementById("videoPreview")
+                const canvas = document.getElementById("videoCanvas")
+                const context = canvas.getContext("2d")
+                canvas.width = 224
+                canvas.height = 224
+                video.srcObject = await navigator.mediaDevices.getUserMedia({video: true, audio: false})
+                video.play()
+
+                // wait for the stream to start and init placeholders
+                video.addEventListener(
+                    "canplay",
+                    (ev) => {
+                        const height = video.videoHeight / (video.videoWidth / canvas.width)
+
+                        if (isNaN(height)) {
+                            console.warn("Cannot read height from video")
+                            height = canvas.width / (4 / 3)
+                        }
+
+                        video.setAttribute("width", canvas.width)
+                        video.setAttribute("height", height)
+                    },
+                    false,
+                )
+
+                // trigger inference when submiting the form
+                const form = document.getElementById('classifyImageForm')
+                form.addEventListener('submit', async event => {
+                    event.preventDefault()
+
+                    // retrieve image buffer from video stream using the canvas
+                    // image is mirrored for natural look
+                    context.setTransform(-1, 0, 0, 1, canvas.width, 0)
+                    const scaledHeight = canvas.width * (video.height / video.width)
+                    context.reset()
+                    context.drawImage(video, 0, (canvas.height - scaledHeight) / 2, canvas.width, scaledHeight)
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+                    const { data, width, height } = imageData
+
+                    const classOutput = await classifyImage(data)
+                    document.getElementById('classOutput').value = classOutput
+                })
+            }
+
+            main()
+        </script>
+    </body>
+</html>

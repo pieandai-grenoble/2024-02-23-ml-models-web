@@ -4,6 +4,14 @@
 
 > Learn how to run inference of machine learning and deep learning models locally in the browser
 
+🧑‍🏫 Slides: https://pieandai-grenoble.github.io/2024-02-23-ml-models-web/
+
+🧑‍💻 Samples:
+- https://pieandai-grenoble.github.io/2024-02-23-ml-models-web/samples/housing/index.html
+- https://pieandai-grenoble.github.io/2024-02-23-ml-models-web/samples/sentiment/index.html
+- https://pieandai-grenoble.github.io/2024-02-23-ml-models-web/samples/imaging/index.html
+- https://pieandai-grenoble.github.io/2024-02-23-ml-models-web/samples/imaging/live.html
+
 ## Event
 
 [Pie & AI](https://www.deeplearning.ai/events/) is a series of DeepLearning.AI meetups independently hosted by community groups.

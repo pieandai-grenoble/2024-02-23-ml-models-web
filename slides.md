@@ -271,6 +271,7 @@ GitHub Repository
 
 - [Notebook](samples/imaging/training.html)
 - [Web](samples/imaging/index.html)
+- [Web (live)](samples/imaging/live.html)
 
 ---
 
