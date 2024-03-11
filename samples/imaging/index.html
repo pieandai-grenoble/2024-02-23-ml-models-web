@@ -9,7 +9,7 @@
         <main>
             <h1>Image Classification</h1>
 
-            <img id="imagePreview" src="" style="max-width: 224px; height: auto; border: 1 solid lightgray;">
+            <canvas id="canvasPreview" style="width: 224px; height: 224px;"></canvas>
 
             <form id="classifyImageForm">
                 <label for="imageInput">Image</label>
@@ -23,9 +23,6 @@
         </main>
 
         <script type="module">
-            // import Jimp from CDN
-            import "https://cdn.jsdelivr.net/npm/jimp@0.22.10/browser/lib/jimp.min.js"
-
             // import ONNXRuntime Web from CDN
             import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js"
 
@@ -44,16 +41,13 @@
             const response = await fetch("imagenet_class_index.json")
             const imagenetClassIndex = await response.json()
 
-            function imageDataToTensor(image, dims) {
-                // get buffer data from Jimp image
-                var imageBufferData = image.bitmap.data
-
+            function imageDataToTensor(imageData, dims) {
                 // convert image buffer from RGBA to RGB and normalize pixel values between -1 and 1
                 const float32Data = new Float32Array(dims[1] * dims[2] * dims[3])
-                for (let i = 0, j = 0; i < imageBufferData.length; i += 4, j += 3) {
-                    float32Data[j] = (imageBufferData[i] / 127.5) - 1.0
-                    float32Data[j + 1] = (imageBufferData[i + 1] / 127.5) - 1.0
-                    float32Data[j + 2] = (imageBufferData[i + 2] / 127.5) - 1.0
+                for (let i = 0, j = 0; i < imageData.length; i += 4, j += 3) {
+                    float32Data[j] = (imageData[i] / 127.5) - 1.0
+                    float32Data[j + 1] = (imageData[i + 1] / 127.5) - 1.0
+                    float32Data[j + 2] = (imageData[i + 2] / 127.5) - 1.0
                 }
 
                 // create tensor from RGB buffer with proper dimensions
@@ -87,23 +81,31 @@
             }
 
             function main() {
+                const imageInput = document.getElementById('imageInput')
+                const canvas = document.getElementById("canvasPreview")
+                canvas.width = 224
+                canvas.height = 224
+                const context = canvas.getContext("2d")
+                const img = new Image()
+
                 // trigger inference when submiting the form
                 const form = document.getElementById('classifyImageForm')
                 form.addEventListener('submit', async event => {
                     event.preventDefault()
-                    const imageInput = document.getElementById('imageInput').files[0]
-                    const imageBuffer = await imageInput.arrayBuffer()
-                    const image = await Jimp.read(imageBuffer).then((buf) => {
-                        return buf.resize(224, 224).rgba(false)
-                    })
-
-                    const classOutput = await classifyImage(image)
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+                    const { data, width, height } = imageData
+                    const classOutput = await classifyImage(data)
                     document.getElementById('classOutput').value = classOutput
                 })
 
-                // preview the selected image
-                document.getElementById('imageInput').addEventListener('change', async event => {
-                    document.getElementById('imagePreview').setAttribute('src', window.URL.createObjectURL(event.target.files[0]))
+                // preview the selected image in the canvas (which will perform resizing automatically)
+                img.addEventListener("load", e => {
+                    const scaledHeight = canvas.width * (img.height / img.width)
+                    context.reset()
+                    context.drawImage(img, 0, (canvas.height - scaledHeight) / 2, canvas.width, scaledHeight)
+                })
+                imageInput.addEventListener('change', async event => {
+                    img.src = window.URL.createObjectURL(event.target.files[0])
                 })
             }
 
